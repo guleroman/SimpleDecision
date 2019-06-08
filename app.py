@@ -1,7 +1,5 @@
 from flask import Flask, jsonify, request, json, make_response, send_file
 import time
-import numpy as np
-import pandas as pd
 from sentimental import Sentimental
 
 app = Flask(__name__)
@@ -21,4 +19,4 @@ def main():
 #-------------------------------------------------------------------------
 if __name__ == '__main__':
 
-    app.run(debug=False,threaded = True, host='0.0.0.0', port=7080)
+    app.run(debug=False,threaded = True, host='0.0.0.0', port=7777)
