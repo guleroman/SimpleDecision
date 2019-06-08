@@ -45,7 +45,7 @@ def main():
     result.update({"company":company_name})
 
     print("--- %s seconds ---" % (time.time() - start_time))
-    return (jsonify(selectText,result))
+    return (jsonify(result))
     #return('ok')   
 #-------------------------------------------------------------------------
 if __name__ == '__main__':
