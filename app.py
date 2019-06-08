@@ -15,6 +15,7 @@ def main():
     data_post = json.loads(request.data) 
     sentence = data_post['content']
     words = [morph.parse(word)[0].normal_form for word in re.findall(r'\w+', sentence)]
+    #sentence_2 = {" ".join(words)}
     sentence = " ".join(words)
     result = sent.analyze(sentence)
     
