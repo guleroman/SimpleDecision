@@ -4,16 +4,27 @@ import time
 import re
 from sentimental import Sentimental
 import pymorphy2
-
+import json
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 sent = Sentimental()
 morph = pymorphy2.MorphAnalyzer()
 
+API_KEY = "abf14d0b25b6fb82ea3a316353fdb9d06eaf5d76"
+BASE_URL = "https://suggestions.dadata.ru/suggestions/api/4_1/rs/suggest/{}"
+
+def suggest(query, resource, count=10):
+    url = BASE_URL.format(resource)
+    headers = {"Authorization": "Token {}".format(API_KEY), "Content-Type": "application/json"}
+    data = {"query": query, "count": count}
+    r = requests.post(url, data=json.dumps(data), headers=headers)
+    return r.json()
+
 @app.route('/api/social', methods=['POST'])
 def main():
     start_time = time.time()
     data_post_mas = json.loads(request.data)
+    company_data_yes_no = data_post_mas['company_data']
     result_mas = {}
     for j in range(len(data_post_mas['data'])):
         result = {}
@@ -48,8 +59,15 @@ def main():
         sentence = " ".join(words)
         result = sent.analyze(sentence)
         result.update({"company":company_name})
+        if (company_name != '') and (company_data_yes_no == True):
+            try:
+                company_data = suggest(company_name, "party", count=1)
+                result.update({"company_data":company_data})
+            except:
+                pass
         #print(result)
         result_mas.update({j:result})
+        
         #print(result_mas)
     print("--- %s seconds ---" % (time.time() - start_time))
     return (jsonify(result_mas))
