@@ -13,39 +13,46 @@ morph = pymorphy2.MorphAnalyzer()
 @app.route('/api/social', methods=['POST'])
 def main():
     start_time = time.time()
-    data_post = json.loads(request.data) 
-    link = data_post['url']
-    if link is not None:
-        ss = requests.get(link)     #Переназначение мыла
-        bb = bs4.BeautifulSoup(ss.text, "html.parser")
-        text = bb.findAll({'p' : True}) #Выборка значений в тегах "p"
-        selectText = ''
-        for i in range(len(text)):      #Слепляем обрубки строк
-            selectText = selectText + ' ' + text[i].getText()
+    data_post_mas = json.loads(request.data)
+    result_mas = {}
+    for j in range(len(data_post_mas['data'])):
+        result = {}
+        data_post = data_post_mas['data'][j]
+        #print ('ok - ',j)
+        link = data_post['url']
+        if link is not None:
+            ss = requests.get(link)     #Переназначение мыла
+            bb = bs4.BeautifulSoup(ss.text, "html.parser")
+            text = bb.findAll({'p' : True}) #Выборка значений в тегах "p"
+            selectText = ''
+            for i in range(len(text)):      #Слепляем обрубки строк
+                selectText = selectText + ' ' + text[i].getText()
 
-    else:
-        selectText = data_post['content']
-    company_name = ''
-    for nnn in ['ОАО','ПАО','ЗАО','ООО']:
-        if selectText.partition(nnn)[2] != '':
-            if selectText.partition(nnn)[2][1:][0] == '«':
-                company_name = selectText.partition(nnn)[2].partition('«')[2].partition('»')[0]
-            elif selectText.partition(nnn)[2][1:][0] == '\"':
-                company_name = selectText.partition(nnn)[2].partition('\"')[2].partition('\"')[0]
-            elif selectText.partition(nnn)[2][1:][0] == '\'':
-                company_name = selectText.partition(nnn)[2].partition('\'')[2].partition('\'')[0]
-            else:
-                company_name = selectText.partition(nnn)[2][1:].partition(' ')[0]
-        if company_name != '' :
-            break
-    words = [morph.parse(word)[0].normal_form for word in re.findall(r'\w+', selectText)]
-    #sentence_2 = {" ".join(words)}
-    sentence = " ".join(words)
-    result = sent.analyze(sentence)
-    result.update({"company":company_name})
-
+        else:
+            selectText = data_post['content']
+        company_name = ''
+        for nnn in ['ОАО','ПАО','ЗАО','ООО']:
+            if selectText.partition(nnn)[2] != '':
+                if selectText.partition(nnn)[2][1:][0] == '«':
+                    company_name = selectText.partition(nnn)[2].partition('«')[2].partition('»')[0]
+                elif selectText.partition(nnn)[2][1:][0] == '\"':
+                    company_name = selectText.partition(nnn)[2].partition('\"')[2].partition('\"')[0]
+                elif selectText.partition(nnn)[2][1:][0] == '\'':
+                    company_name = selectText.partition(nnn)[2].partition('\'')[2].partition('\'')[0]
+                else:
+                    company_name = selectText.partition(nnn)[2][1:].partition(' ')[0]
+            if company_name != '' :
+                break
+        words = [morph.parse(word)[0].normal_form for word in re.findall(r'\w+', selectText)]
+        #sentence_2 = {" ".join(words)}
+        sentence = " ".join(words)
+        result = sent.analyze(sentence)
+        result.update({"company":company_name})
+        #print(result)
+        result_mas.update({j:result})
+        #print(result_mas)
     print("--- %s seconds ---" % (time.time() - start_time))
-    return (jsonify(result))
+    return (jsonify(result_mas))
     #return('ok')   
 #-------------------------------------------------------------------------
 if __name__ == '__main__':
