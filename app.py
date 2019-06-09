@@ -31,7 +31,7 @@ def main():
         data_post = data_post_mas['data'][j]
         #print ('ok - ',j)
         link = data_post['url']
-        if link is not None:
+        if (link is not None) and (link[:14] != 'https://vk.com'):
             ss = requests.get(link)     #Переназначение мыла
             bb = bs4.BeautifulSoup(ss.text, "html.parser")
             text = bb.findAll({'p' : True}) #Выборка значений в тегах "p"
